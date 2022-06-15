@@ -3,11 +3,17 @@ package com.codegym.controller;
 import com.codegym.model.Product;
 import com.codegym.service.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -15,6 +21,8 @@ import java.util.Optional;
 @CrossOrigin("*")
 @RequestMapping("/product")
 public class ProductController {
+    @Value("${file-upload}")
+    private String fileUpload;
     @Autowired
     IProductService productService;
 
@@ -23,12 +31,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity addProduct(@RequestBody Product product) {
-        product.setDate(new Date());
-        productService.save(product);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
+
 
     @GetMapping("/order-by-price")
     public ResponseEntity<Iterable<Product>> findAllByOrderByPrice() {
@@ -69,4 +72,17 @@ public class ProductController {
         Iterable<Product> products = productService.findAllByNameContaining(search);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+    @PostMapping("/upload")
+    public ResponseEntity<Product> add(@RequestParam("file") MultipartFile file, Product product) {
+        String fileName = file.getOriginalFilename();
+        product.setImage(fileName);
+        try {
+            file.transferTo(new File("D:\\product_webstrom\\image\\" + fileName));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.ok( productService.saveP(product));
+    }
+
 }

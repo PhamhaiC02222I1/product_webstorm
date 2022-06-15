@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -16,7 +17,8 @@ public class Product {
     private String name;
     private String price;
     private String image;
-    private Date date;
+//    @JsonFormat(pattern = "dd-MM-YYYY ")
+//    private Date date;
 
 
 
@@ -27,12 +29,12 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, String price, String image, Date date, Category category) {
+    public Product(Long id, String name, String price, String image,  Category category) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.image = image;
-        this.date = date;
+//        this.date = date;
         this.category = category;
     }
 
@@ -68,13 +70,13 @@ public class Product {
         this.image = image;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
+//    public Date getDate() {
+//        return date;
+//    }
+//
+//    public void setDate(Date date) {
+//        this.date = date;
+//    }
 
     public Category getCategory() {
         return category;

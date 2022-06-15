@@ -1,6 +1,7 @@
 package com.codegym.service;
 
 import com.codegym.model.Category;
+import com.codegym.model.Product;
 import com.codegym.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,11 @@ public class CategoryService implements ICategoryService{
     @Override
     public void save(Category category) {
     categoryRepository.save(category);
+    }
+
+    @Override
+    public Category saveP(Category category) {
+        return null;
     }
 
     @Override

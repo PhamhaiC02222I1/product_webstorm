@@ -44,8 +44,8 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    @Value("${file-upload}")
-    private String fileUpload;
+//    @Value("${file-upload}")
+//    private String fileUpload;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -121,12 +121,12 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
         return properties;
     }
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/image/**")
-                .addResourceLocations("file:" + fileUpload);
-
-    }
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/image/**")
+//                .addResourceLocations("file:" + fileUpload);
+//
+//    }
 
     @Bean(name = "multipartResolver")
     public CommonsMultipartResolver getResolver() throws IOException {
