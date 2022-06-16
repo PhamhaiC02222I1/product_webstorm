@@ -19,17 +19,19 @@
 <br>
 <input type="text" id="search">
 <button onclick="findByName()">FindByName</button>
-<table id="display" >
-
-
-</table>
 <!--<form enctype="multipart/form-data" id="form">-->
 <!--    <input type="text" name="name">-->
 <!--    <input type="number" name="price">-->
 <!--    <input type="number" name="category">-->
 <!--    <input type="file" name="file"/>-->
-<!--    <button type="button" onclick="submitForm()">Upload</button>-->
+<!--    <button type="button" onclick="submitForm()">Them san pham</button>-->
 <!--</form>-->
+
+<div id="display" >
+
+
+</div>
+
 <script>
     let show = document.getElementById("display");
     let size = 0;
@@ -45,33 +47,112 @@
             url: "http://localhost:8080/product",
             //xử lý khi thành công
             success: function (data) {
-                display(data)
+                // display(data)
+                // hien thi danh sach o day
+                let str = ""
+                str = `<table border="1"> <tr>\n
+                                <td>Name</td>\n
+                                <td>price</td>\n
+                                <td>image</td>\n
+                                <td>Category</td>\n
+                                <td>Delete</td>\n
+                                <td>Edit</td>\n
+                           </tr>`
+                for (let i = 0; i < data.length; i++) {
+                    str +=
+                        ` <tr>\n
+                                   <td> ${data[i].name}  </td>\n
+                                   <td> ${data[i].price}  </td>\n
+                                    <td> <img  style="height:150px;width:150px" src="\\image\\${data[i].image}"> </td>\n
+                                    <td>${data[i].category.name} </td>\n
+                                    <td><button onclick="del(${data[i].id})">Delete</button></td>\n
+                                    <td><button onclick="editForm(${data[i].id})">Edit</button></td>\n
+                                </tr>`
+                }
+                str += '</table>';
+                show.innerHTML = str;
             },
-            error: function (error) {
-                console.log(error);
+        });
+    }
+
+    function listBlog() {
+        $.ajax({
+            async: false,
+            method: "GET",
+            url: "http://localhost:8080/product",
+            dataType: "json",
+            success: function (data) {
+                console.log('data list = ', data.length)
+                size = data.length
+
             }
         });
     }
 
-    // function submitForm() {
-    //     let form = document.getElementById("form");
-    //     let data = new FormData(form);
-    //     $.ajax({
-    //         type: "POST",
-    //         enctype: 'multipart/form-data',
-    //         url: "http://localhost:8080/product/upload",
-    //         data: data,
-    //         processData: false,
-    //         contentType: false,
-    //         cache: false,
-    //         timeout: 1000000,
-    //         success: function () {
-    //             // document.getElementById('main').innerHTML = `${data.name}<img src="\\image\\${data.image}">`
-    //             findAll()
-    //             pageSmartPhone()
-    //         }
-    //     })
+    //PAGINATION
+    function pageSmartPhone() {
+        $(function () {
+            let container = $('#demo');
+            container.pagination({
+                dataSource: 'http://localhost:8080/product',
+                locator: 'items',
+                totalNumber: size,
+                pageSize: 5,
+                callback: function (response, pagination) {
+                    let dataHtml = `<table border="1" class="table">
+                            <tr>\n
+                                <td>Name</td>\n
+                                <td>price</td>\n
+                                <td>image</td>\n
+                                <td>Category</td>\n
+                                <td>Delete</td>\n
+                                <td>Edit</td>\n
+                           </tr>`
+                    let pageStart = (pagination.pageNumber - 1) * pagination.pageSize;
+                    let pageEnd = pageStart + pagination.pageSize;
+                    let pageItems = response.slice(pageStart, pageEnd);
+                    $.each(pageItems, function (index, product) {
+                        dataHtml +=
+                            ` <tr>\n
+                                   <td> ${product.name}  </td>\n
+                                   <td> ${product.price}  </td>\n
+                                    <td> <img  style="height:150px;width:150px" src="\\image\\${product.image}"> </td>\n
+                                    <td>${product.category.name} </td>\n
+                                    <td><button onclick="del(${product.id})">Delete</button></td>\n
+                                    <td><button onclick="editForm(${product.id})">Edit</button></td>\n
+                                </tr>`
+
+                    })
+                    dataHtml += '</table>';
+                    container.prev().html(dataHtml);
+
+                }
+            })
+        })
+    }
+
+    // function showAddForm() {
+    //
     // }
+    function submitForm() {
+        let form = document.getElementById("form");
+        let data = new FormData(form);
+        $.ajax({
+            type: "POST",
+            enctype: 'multipart/form-data',
+            url: "http://localhost:8080/product/upload",
+            data: data,
+            processData: false,
+            contentType: false,
+            cache: false,
+            timeout: 1000000,
+            success: function () {
+                // document.getElementById('main').innerHTML = `${data.name}<img src="\\image\\${data.image}">`
+                findAll()
+                pageSmartPhone()
+            }
+        })
+    }
 
     function findByName() {
         let search = document.getElementById("search").value;
@@ -89,7 +170,7 @@
 
     function display(data) {
         let str = ""
-        str = ` <tr>\n
+        str = `<table></table> <tr>\n
                                 <td>Name</td>\n
                                 <td>price</td>\n
                                 <td>image</td>\n
@@ -108,77 +189,36 @@
                                     <td><button onclick="editForm(${data[i].id})">Edit</button></td>\n
                                 </tr>`
         }
+        str += '</table>';
         show.innerHTML = str;
     }
 
 
-
     function editForm(id) {
-        let str = ''
         $.ajax({
             type: "GET",
             url: "http://localhost:8080/product/" + id,
 
             success: function (product) {
-                str = `<label>Name</label><input type="text" id="nameEdit" placeholder="name"> <br>
-<label>Price</label><input type="text" id="priceEdit" placeholder="price"> <br>
-<label>category</label>
-<select name="category" id="categoryEdit">
-<option id="1" value="HN">HN</option>
-<option id="2" value="HCM">HCM</option>
-<option id="3" value="NB">NB</option>
-<option id="4" value="DN">DN</option>
-</select>
- <button onclick='saveEdit(${product.id})'>Them</button>
-`
+                let str = `<form enctype="multipart/form-data" id="form1">` +
+                    `<input type="text" name="name">` +
+                    `<input type="number" name="price">` +
+                    `<input type="number" name="category">` +
+                    `<input type="file" name="file"/>` +
+                    ` <button onclick='saveEdit(${product.id})'>Sua</button>` +
+                    `</form>`
                 show.innerHTML = str
+
             }
         })
     }
-
     function saveEdit(id) {
-        let nameEdit = document.getElementById("nameEdit").value;
-        let priceEdit = document.getElementById("priceEdit").value;
-        let categoryId = $("#categoryEdit").find('option:selected').attr('id');
-        let productEdit = {
-            name: nameEdit,
-            price: priceEdit,
-            category: {
-                id: categoryId
-            }
-        };
-        $.ajax({
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            type: "PUT",
-            data: JSON.stringify(productEdit),
-            url: "http://localhost:8080/product/" + id,
-            success: function () {
-                pageSmartPhone()
-            }
-        });
-
-    }
-    function showAddProduct() {
-        let str = `<form enctype="multipart/form-data" id="form">
-    <input type="text" name="name">
-    <input type="number" name="price">
-    <input type="number" name="category">
-    <input type="file" name="file"/>
-    <button type="button" onclick="save()">Upload</button>
-</form>`
-
-        show.innerHTML = str;
-    }
-    function save() {
-        let form = document.getElementById("form");
+        let form = document.getElementById("form1");
         let data = new FormData(form);
         $.ajax({
-            type: "POST",
+            type: "PUT",
             enctype: 'multipart/form-data',
-            url: "http://localhost:8080/product/upload",
+            url: "http://localhost:8080/product/" + id,
             data: data,
             processData: false,
             contentType: false,
@@ -190,38 +230,74 @@
                 pageSmartPhone()
             }
         })
-        // let name = document.getElementById("name").value;
-        // let price = document.getElementById("price").value;
-        // let image = document.getElementById("image").value;
-        // let categoryId = document.getElementById("category").value;
-        // let product = {
-        //     name: name,
-        //     price: price,
-        //     image: image,
+        // let nameEdit = document.getElementById("nameEdit").value;
+        // let priceEdit = document.getElementById("priceEdit").value;
+        // let categoryId = $("#categoryEdit").find('option:selected').attr('id');
+        // let productEdit = {
+        //     name: nameEdit,
+        //     price: priceEdit,
         //     category: {
         //         id: categoryId
         //     }
-        // }
+        // };
         // $.ajax({
         //     headers: {
         //         'Accept': 'application/json',
         //         'Content-Type': 'application/json'
         //     },
-        //     type: "POST",
-        //     data: JSON.stringify(product),
-        //     //tên API
-        //     url: "http://localhost:8080/product",
-        //     //xử lý khi thành công
+        //     type: "PUT",
+        //     data: JSON.stringify(productEdit),
+        //     url: "http://localhost:8080/product/" + id,
         //     success: function () {
-        //         display()
-        //     },
-        //     error: function (error) {
-        //         console.log(error)
+        //         pageSmartPhone()
         //     }
-        // })
-        // //chặn sự kiện mặc định của thẻ
-        // event.preventDefault();
+        // });
+
     }
+
+    function showAddProduct() {
+        let str = `<form enctype="multipart/form-data" id="form">` +
+            `<input type="text" name="name">` +
+            `<input type="number" name="price">` +
+            `<input type="number" name="category">` +
+            `<input type="file" name="file"/>` +
+            `<button type="button" onclick="submitForm()">Them san pham</button>` +
+            `</form>`
+        show.innerHTML = str
+    }
+
+    // function saveProduct() {
+    //
+    //     let name = document.getElementById("name").value;
+    //     let price = document.getElementById("price").value;
+    //     let image = document.getElementById("image").value;
+    //     let categoryId = $("#categoryEdit").find('option:selected').attr('id');
+    //     let productEdit = {
+    //         name: name,
+    //         price: price,
+    //         image: image,
+    //         category: {
+    //             id: categoryId
+    //         }
+    //     };
+    //     $.ajax({
+    //         headers: {
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json'
+    //         },
+    //         type: "POST",
+    //         data: JSON.stringify(productEdit),
+    //         //tên API
+    //         url: "http://localhost:8080/product",
+    //         //xử lý khi thành công
+    //         success: function () {
+    //             findAll()
+    //         },
+    //         error: function (error) {
+    //             console.log(error)
+    //         }
+    //     })
+    // }
 
     function showAllByPrice() {
 
@@ -230,8 +306,8 @@
             //tên API
             url: "http://localhost:8080/product/order-by-price",
             //xử lý khi thành công
-            success: function () {
-                findAll()
+            success: function (data) {
+                display(data)
             },
             error: function (error) {
                 console.log(error);
@@ -276,63 +352,6 @@
     }
 
 
-
-    //PAGINATION
-    function pageSmartPhone() {
-
-        $(function () {
-            let container = $('#demo');
-            container.pagination({
-                dataSource: 'http://localhost:8080/product',
-                locator: 'items',
-                totalNumber: size,
-                pageSize: 5,
-                callback: function (response, pagination) {
-                    let dataHtml = `<table border="1" class="table">
-                            <tr>\n
-                                <td>Name</td>\n
-                                <td>price</td>\n
-                                <td>image</td>\n
-                                <td>Category</td>\n
-                                <td>Delete</td>\n
-                                <td>Edit</td>\n
-                           </tr>`
-                    let pageStart = (pagination.pageNumber - 1) * pagination.pageSize;
-                    let pageEnd = pageStart + pagination.pageSize;
-                    let pageItems = response.slice(pageStart, pageEnd);
-                    $.each(pageItems, function (index, product) {
-                        dataHtml +=
-                            ` <tr>\n
-                                   <td> ${product.name}  </td>\n
-                                   <td> ${product.price}  </td>\n
-                                    <td> <img  style="height:150px;width:150px" src="\\image\\${product.image}"> </td>\n
-                                    <td>${product.category.name} </td>\n
-                                    <td><button onclick="del(${product.id})">Delete</button></td>\n
-                                    <td><button onclick="editForm(${product.id})">Edit</button></td>\n
-                                </tr>`
-
-                    })
-                    dataHtml += '</table>';
-                    container.prev().html(dataHtml);
-
-                }
-            })
-        })
-    }
-
-    function listBlog() {
-        $.ajax({
-            async: false,
-            method: "GET",
-            url: "http://localhost:8080/product",
-            dataType: "json",
-            success: function (data) {
-                console.log('data list = ', data.length)
-                size = data.length
-
-            }
-        });
-    }
 </script>
 
 

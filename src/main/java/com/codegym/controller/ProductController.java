@@ -31,7 +31,11 @@ public class ProductController {
         return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
     }
 
-
+    @PostMapping
+    public ResponseEntity createProduct(@RequestBody Product product) {
+        productService.saveP(product);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @GetMapping("/order-by-price")
     public ResponseEntity<Iterable<Product>> findAllByOrderByPrice() {
@@ -72,9 +76,10 @@ public class ProductController {
         Iterable<Product> products = productService.findAllByNameContaining(search);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
     @PostMapping("/upload")
     public ResponseEntity<Product> add(@RequestParam("file") MultipartFile file, Product product) {
-        String fileName = file.getOriginalFilename();
+         String fileName = file.getOriginalFilename();
         product.setImage(fileName);
         try {
             file.transferTo(new File("D:\\product_webstrom\\image\\" + fileName));
@@ -82,7 +87,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        return ResponseEntity.ok( productService.saveP(product));
+        return ResponseEntity.ok(productService.saveP(product));
     }
 
 }
